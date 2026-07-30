@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">wsoffline</string>
+    <string name="title_activity_main">wsoffline</string>
+    <string name="package_name">com.wsoffline.app</string>
+    <string name="custom_url_scheme">com.wsoffline.app</string>
+</resources>

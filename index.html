@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pilih Modul</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              50: '#eef6ff', 100: '#d9ebff', 200: '#bcdcff', 300: '#8ec4ff',
+              400: '#589fff', 500: '#3178f6', 600: '#1f5ce0', 700: '#1b49b8',
+              800: '#1c3f93', 900: '#1c3874',
+            },
+            ink: {
+              50: '#f6f7f9', 100: '#eceef2', 200: '#d5dae2', 300: '#b0bac9',
+              400: '#8593a8', 500: '#66748c', 600: '#515d72', 700: '#434c5e',
+              800: '#3a4150', 900: '#343a45',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root { 
+      --page-bg: #f4f6fb; 
+    }
+
+    body {
+      background-color: var(--page-bg);
+      background-image:
+        radial-gradient(circle at 12% 8%, rgba(88,159,255,0.12), transparent 45%),
+        radial-gradient(circle at 92% 4%, rgba(120,110,255,0.12), transparent 45%),
+        radial-gradient(circle at 50% 96%, rgba(52,211,153,0.08), transparent 50%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
+    
+    body::before {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image: radial-gradient(rgba(28,56,116,0.06) 1px, transparent 1px);
+      background-size: 24px 24px;
+      mask-image: radial-gradient(circle at 50% 40%, #000 40%, transparent 100%);
+      -webkit-mask-image: radial-gradient(circle at 50% 40%, #000 40%, transparent 100%);
+    }
+
+    /* --- OVERENGINEERED CARD V2 --- */
+    .card-container {
+      perspective: 1200px; 
+    }
+
+    .card {
+      position: relative;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border-radius: 1.5rem;
+      transform-style: preserve-3d;
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.15), box-shadow 0.8s ease;
+      box-shadow: 
+        0 4px 10px -2px rgba(28, 56, 116, 0.05),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      isolation: isolate;
+      cursor: pointer;
+      outline: none;
+      
+      /* OPTIMASI TABLET: Hilangkan highlight abu-abu bawaan saat di-tap & cegah teks ter-select */
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: 1.6rem;
+      background: radial-gradient(
+        400px circle at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
+        rgba(255, 255, 255, 1),
+        transparent 40%
+      );
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .card .glare {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(
+        circle at var(--mouse-px, 50%) var(--mouse-py, 50%), 
+        rgba(255, 255, 255, 0.8) 0%, 
+        rgba(255, 255, 255, 0) 60%
+      );
+      opacity: 0;
+      z-index: 2;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      mix-blend-mode: overlay;
+    }
+
+    /* State Aktif (Hover PC & Touch Tablet) */
+    .card.is-active {
+      box-shadow: 
+        var(--hover-shadow-x, 0px) var(--hover-shadow-y, 20px) 40px -10px rgba(28, 56, 116, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+    }
+    .card.is-active::before, .card.is-active .glare { opacity: 1; }
+
+    /* 3D Depth Content Wrapper */
+    .card-content {
+      position: relative;
+      z-index: 3;
+      transform-style: preserve-3d;
+      pointer-events: none;
+    }
+
+    /* MULTI-LAYERED PARALLAX */
+    .card .icon-badge, .card h2, .card p, .card .action-link {
+      transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+      transform: translateZ(0px); 
+    }
+
+    .card.is-active .icon-badge { transform: translateZ(60px) scale(1.05); }
+    .card.is-active h2 { transform: translateZ(45px); }
+    .card.is-active p { transform: translateZ(25px); }
+    .card.is-active .action-link { transform: translateZ(35px); }
+    .card.is-active .arrow { transform: translateX(6px); }
+
+    /* Base Animations */
+    .icon-badge {
+      display:grid; place-items:center; width:2.5rem; height:2.5rem; border-radius:0.85rem;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.8);
+      position: relative;
+    }
+    @keyframes breathe { 
+      0%, 100% { box-shadow: 0 0 0 0 rgba(49,120,246,0.25), inset 0 0 0 1px rgba(255,255,255,0.8); } 
+      50% { box-shadow: 0 0 0 8px rgba(49,120,246,0), inset 0 0 0 1px rgba(255,255,255,0.8); } 
+    }
+    .breathe { animation: breathe 3s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+
+    .reveal { opacity: 0; transform: translateY(24px); animation: rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes rise { to { opacity: 1; transform: none; } }
+
+    /* Transition Overlay */
+    .page-transition-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999;
+      pointer-events: none;
+      clip-path: circle(0px at var(--click-x) var(--click-y));
+      transition: clip-path 0.7s cubic-bezier(0.77, 0, 0.17, 1);
+    }
+    .page-transition-overlay.active { clip-path: circle(150vw at var(--click-x) var(--click-y)); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; transform: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body class="min-h-screen text-ink-800 font-sans antialiased selection:bg-brand-200/60">
+
+  <main class="relative z-10 min-h-screen flex flex-col items-center justify-center px-5 py-10">
+
+    <div class="reveal flex items-center gap-2.5 mb-12">
+      <span class="icon-badge breathe bg-brand-500/10 text-brand-600 !w-10 !h-10" aria-hidden="true">
+        <i data-lucide="shield-check" class="w-5 h-5"></i>
+      </span>
+      <span class="font-extrabold tracking-tight text-xl text-ink-900">Simulasi<span class="text-brand-600">.</span>Desk</span>
+    </div>
+
+    <section class="w-full max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-7">
+
+      <!-- RISK ANALYSIS CARD -->
+      <div class="card-container reveal" style="animation-delay:.1s">
+        <a href="Risk/Risk.html" aria-label="Buka Risk Analysis" data-theme="#f59e0b"
+           class="card p-7 flex flex-col h-[260px]">
+          <div class="glare"></div>
+          <div class="card-content flex flex-col h-full">
+            <span class="icon-badge bg-amber-500/10 text-amber-500 !w-14 !h-14 !rounded-2xl mb-5 shadow-sm" aria-hidden="true">
+              <i data-lucide="radar" class="w-7 h-7"></i>
+            </span>
+            <h2 class="font-extrabold text-2xl text-ink-900 tracking-tight drop-shadow-sm">Risk Analysis</h2>
+            <p class="text-sm text-ink-500 mt-2 mb-6 font-medium leading-relaxed">Penilaian risiko objek pertanggungan secara mendalam.</p>
+            <span class="action-link mt-auto inline-flex items-center gap-2 text-sm font-bold text-amber-500">
+              Buka Modul <i data-lucide="arrow-right" class="w-4 h-4 arrow"></i>
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <!-- SIMULASI CARD -->
+      <div class="card-container reveal" style="animation-delay:.2s">
+        <a href="Simulasi/Simulasi.html" aria-label="Buka Simulasi" data-theme="#3178f6"
+           class="card p-7 flex flex-col h-[260px]">
+          <div class="glare"></div>
+          <div class="card-content flex flex-col h-full">
+            <span class="icon-badge bg-brand-500/10 text-brand-500 !w-14 !h-14 !rounded-2xl mb-5 shadow-sm" aria-hidden="true">
+              <i data-lucide="calculator" class="w-7 h-7"></i>
+            </span>
+            <h2 class="font-extrabold text-2xl text-ink-900 tracking-tight drop-shadow-sm">Simulasi</h2>
+            <p class="text-sm text-ink-500 mt-2 mb-6 font-medium leading-relaxed">Hitung premi properti & gempa dengan akurat.</p>
+            <span class="action-link mt-auto inline-flex items-center gap-2 text-sm font-bold text-brand-600">
+              Buka Modul <i data-lucide="arrow-right" class="w-4 h-4 arrow"></i>
+            </span>
+          </div>
+        </a>
+      </div>
+
+    </section>
+
+    <p class="reveal text-xs font-medium text-ink-400 mt-14 tracking-wide uppercase" style="animation-delay:.3s">
+      © 2026 Stheven
+    </p>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+
+      const cards = document.querySelectorAll('.card');
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (!prefersReducedMotion) {
+        cards.forEach(card => {
+          
+          // FUNGSI UTAMA: Menghitung posisi 3D (Dipakai untuk Mouse & Tablet)
+          const handleMovement = (e) => {
+            const rect = card.getBoundingClientRect();
+            
+            // Deteksi apakah ini input sentuhan (Tablet/HP) atau Kursor Mouse
+            const isTouch = e.type.includes('touch');
+            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+            
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+            
+            const px = (x / rect.width) * 100;
+            const py = (y / rect.height) * 100;
+
+            card.style.setProperty('--mouse-x', `${x}px`);
+            card.style.setProperty('--mouse-y', `${y}px`);
+            card.style.setProperty('--mouse-px', `${px}%`);
+            card.style.setProperty('--mouse-py', `${py}%`);
+
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            // Sensitivitas rotasi
+            const rotateX = ((y - centerY) / centerY) * -12; 
+            const rotateY = ((x - centerX) / centerX) * 12;
+
+            const shadowX = ((centerX - x) / centerX) * 15;
+            const shadowY = ((centerY - y) / centerY) * 15;
+            card.style.setProperty('--hover-shadow-x', `${shadowX}px`);
+            card.style.setProperty('--hover-shadow-y', `${shadowY + 15}px`); 
+
+            card.style.transition = 'transform 0.15s ease-out';
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+          };
+
+          const resetMovement = () => {
+            card.classList.remove('is-active');
+            card.style.transition = 'transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.15), box-shadow 0.8s ease';
+            card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+            card.style.setProperty('--mouse-x', `-1000px`);
+            card.style.setProperty('--mouse-y', `-1000px`);
+          };
+
+          // ==========================================
+          // 1. EVENT UNTUK PC / MOUSE
+          // ==========================================
+          card.addEventListener('mouseenter', () => card.classList.add('is-active'));
+          card.addEventListener('mousemove', handleMovement);
+          card.addEventListener('mouseleave', resetMovement);
+
+          // ==========================================
+          // 2. EVENT KHUSUS TABLET / TOUCH SCREEN
+          // ==========================================
+          card.addEventListener('touchstart', (e) => {
+            card.classList.add('is-active');
+            handleMovement(e);
+          }, { passive: true });
+
+          card.addEventListener('touchmove', (e) => {
+            handleMovement(e);
+          }, { passive: true }); // passive: true membiarkan user tetap bisa scroll halaman ke bawah
+
+          card.addEventListener('touchend', resetMovement);
+          card.addEventListener('touchcancel', resetMovement);
+
+          // ==========================================
+          // 3. EFEK KLIK (TRANSISI WARNA)
+          // ==========================================
+          card.addEventListener('click', function(e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            const themeColor = this.getAttribute('data-theme');
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'page-transition-overlay';
+            overlay.style.backgroundColor = themeColor;
+            
+            // Tangkap koordinat klik. Jika di tablet, e.clientX akan mengarah ke titik tap.
+            let clickX = e.clientX;
+            let clickY = e.clientY;
+
+            // Fallback jika nilainya 0 (misal di-tap dengan cara tak lazim)
+            if (clickX === 0 && clickY === 0) {
+              const rect = this.getBoundingClientRect();
+              clickX = rect.left + (rect.width / 2);
+              clickY = rect.top + (rect.height / 2);
+            }
+            
+            overlay.style.setProperty('--click-x', `${clickX}px`);
+            overlay.style.setProperty('--click-y', `${clickY}px`);
+            
+            document.body.appendChild(overlay);
+            void overlay.offsetWidth; 
+            overlay.classList.add('active');
+
+            setTimeout(() => {
+              window.location.href = href;
+              setTimeout(() => { overlay.remove(); }, 100);
+            }, 650);
+          });
+
+        });
+      }
+    });
+
+    // --- BFCACHE KILLER (BACK BUTTON FIX) ---
+    window.addEventListener('pagehide', () => {
+      document.querySelectorAll('.page-transition-overlay').forEach(el => el.remove());
+    });
+    window.addEventListener('pageshow', () => {
+      document.querySelectorAll('.page-transition-overlay').forEach(el => el.remove());
+    });
+  </script>
+</body>
+</html>

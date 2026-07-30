@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cek Risiko Usahamu - Simulasi.Desk</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#fffbe6', 100: '#fef3c7', 200: '#fde68a', 300: '#fcd34d',
+              400: '#fbbf24', 500: '#f59e0b', 600: '#d97706', 700: '#b45309',
+              800: '#92400e', 900: '#78350f',
+            },
+            ink: {
+              50: '#f6f7f9', 100: '#eceef2', 200: '#d5dae2', 300: '#b0bac9',
+              400: '#8593a8', 500: '#66748c', 600: '#515d72', 700: '#434c5e',
+              800: '#3a4150', 900: '#343a45',
+            },
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    :root { --page-bg: #f4f6fb; }
+
+    body {
+      background-color: var(--page-bg);
+      background-image:
+        radial-gradient(circle at 12% 8%, rgba(245,158,11,0.12), transparent 45%),
+        radial-gradient(circle at 92% 4%, rgba(217,119,6,0.12), transparent 45%),
+        radial-gradient(circle at 78% 96%, rgba(251,191,36,0.08), transparent 50%);
+      background-attachment: fixed;
+    }
+
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image: radial-gradient(rgba(180,83,9,0.05) 1px, transparent 1px);
+      background-size: 22px 22px;
+      mask-image: radial-gradient(circle at 50% 30%, #000 55%, transparent 100%);
+    }
+
+    .surface {
+      position: relative;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.9);
+      box-shadow: 0 1px 2px rgba(180,83,9,0.04), 0 12px 30px -14px rgba(180,83,9,0.18);
+    }
+
+    .field {
+      background: #ffffff;
+      border: 1.5px solid #e3e8f0;
+      color: #26303f;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+    .field::placeholder { color: #8a97ab; }
+    .field:hover { border-color: #cdd7e6; }
+    .field:focus {
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 4px rgba(245,158,11,0.15);
+      outline: none; background: #fff;
+    }
+
+    .reveal {
+      opacity: 0; transform: translate3d(0, 18px, 0);
+      transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .reveal.in { opacity: 1; transform: translate3d(0,0,0); }
+
+    .icon-badge {
+      display: grid; place-items: center;
+      width: 2.5rem; height: 2.5rem; border-radius: 0.85rem;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);
+    }
+
+    .select-card {
+      position: relative; overflow: hidden; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid #e3e8f0;
+      border-radius: 1.25rem;
+      box-shadow: 0 1px 2px rgba(180,83,9,0.04), 0 12px 30px -14px rgba(180,83,9,0.18);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      text-align: left;
+      min-height: 180px;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .select-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 30px -16px rgba(217,119,6,0.3);
+      border-color: #fde68a;
+    }
+    .select-card:active { transform: translateY(-1px); }
+
+    .ripple {
+      position: absolute; border-radius: 50%; transform: scale(0);
+      background: rgba(245,158,11,0.15);
+      animation: rippleAnim 0.55s ease-out; pointer-events: none;
+    }
+    @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+
+    .select-card.just-clicked {
+      border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
+    }
+    @keyframes cardPulse {
+      0% { box-shadow: 0 0 0 0 rgba(245,158,11,0.35); }
+      100% { box-shadow: 0 0 0 12px rgba(245,158,11,0); }
+    }
+    .select-card.just-clicked { animation: cardPulse 0.55s ease-out; }
+
+    .view-container { transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1); }
+    .view-hidden { opacity: 0; transform: translateY(-10px); pointer-events: none; display: none !important; }
+
+    .cards-grid { display: grid; grid-template-columns: 1fr; gap: 0.875rem; }
+    @media (min-width: 640px) {
+      .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+      .cards-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .detail-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+    @media (min-width: 1024px) {
+      .detail-grid { grid-template-columns: 1.05fr 0.95fr; align-items: start; }
+    }
+    .detail-col { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .back-link { transition: transform 0.2s ease; }
+    .back-link:hover { transform: translateX(-3px); }
+
+    .sec-head { display: flex; align-items: center; gap: 0.75rem; padding-bottom: 1rem; margin-bottom: 1.1rem; border-bottom: 1px solid #eceef2; }
+
+    /* Hazard card + effect */
+    .hazard-card {
+      background: #fff; border: 1.5px solid #f1e4d3;
+      border-radius: 1rem; padding: 0.9rem;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+    .hazard-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px -14px rgba(217,119,6,0.45);
+      border-color: #fdba74;
+    }
+    .hazard-top { display: flex; gap: 0.75rem; align-items: flex-start; }
+    .hazard-ic {
+      display: grid; place-items: center; flex-shrink: 0;
+      width: 2.3rem; height: 2.3rem; border-radius: 0.7rem;
+      background: linear-gradient(180deg, #fff1e0, #ffe3c2);
+      color: #c2410c; box-shadow: inset 0 0 0 1px rgba(234,88,12,0.12);
+    }
+    .hazard-effect {
+      margin-top: 0.7rem; padding: 0.55rem 0.7rem;
+      background: #fef2f2; border: 1px solid #fecaca; border-radius: 0.6rem;
+      display: flex; gap: 0.45rem; align-items: flex-start;
+      font-size: 0.75rem; line-height: 1.5; color: #991b1b;
+    }
+
+    .apar-card {
+      border-radius: 0.9rem; padding: 0.85rem 0.95rem;
+      border: 1.5px solid #dbeafe; background: #f8fbff;
+      display: flex; gap: 0.75rem; align-items: flex-start;
+    }
+    .apar-ic {
+      display: grid; place-items: center; flex-shrink: 0;
+      width: 2.3rem; height: 2.3rem; border-radius: 0.7rem;
+      background: #dbeafe; color: #1d4ed8;
+    }
+
+    /* Improvement item */
+    .improve-item {
+      display: flex; gap: 0.7rem; align-items: flex-start;
+      padding: 0.75rem 0.85rem; border-radius: 0.85rem;
+      background: #f0fdf4; border: 1px solid #bbf7d0; color: #14532d;
+      font-size: 0.82rem; line-height: 1.5;
+    }
+    .improve-ic {
+      display: grid; place-items: center; flex-shrink: 0;
+      width: 1.35rem; height: 1.35rem; border-radius: 50%;
+      background: #16a34a; color: #fff; margin-top: 0.05rem;
+    }
+
+    .stat-card {
+      border-radius: 1.1rem; padding: 1.1rem 1.2rem;
+      border: 1.5px solid #e3e8f0; background: #fff;
+      display: flex; align-items: center; gap: 0.9rem;
+    }
+    .stat-num { font-size: 1.9rem; line-height: 1; font-weight: 800; }
+
+    /* Risk score meter */
+    .score-track {
+      position: relative; height: 0.65rem; border-radius: 999px;
+      background: linear-gradient(90deg, #22c55e 0%, #eab308 50%, #ef4444 100%);
+      overflow: visible;
+    }
+    .score-marker {
+      position: absolute; top: 50%; width: 1.4rem; height: 1.4rem;
+      border-radius: 50%; background: #fff; border: 3px solid #1e293b;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+      transition: left 0.5s cubic-bezier(0.22,0.61,0.36,1);
+    }
+
+    @media print {
+      body { background: #fff !important; }
+      body::before, header, #btn-print, #area-input, .no-print { display: none !important; }
+      .surface { box-shadow: none !important; border: 1px solid #e5e7eb !important; }
+      .reveal { opacity: 1 !important; transform: none !important; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1 !important; transform: none !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen text-ink-800 font-sans antialiased selection:bg-brand-200/60">
+
+  <header class="sticky top-0 z-[60] backdrop-blur-md bg-white/70 border-b border-white/60">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <button id="btn-back" class="back-link flex items-center gap-1.5 text-ink-500 hover:text-ink-800 text-sm font-semibold mr-3 pr-3 border-r border-ink-200">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        </button>
+        <span class="icon-badge bg-brand-500/12 text-brand-600 !w-9 !h-9" aria-hidden="true">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        </span>
+        <span class="font-extrabold tracking-tight text-ink-900">Simulasi<span class="text-brand-600">.</span>Desk</span>
+      </div>
+      <span id="breadcrumb-pill" class="shrink-0 inline-flex items-center gap-2 text-xs font-semibold bg-white border border-ink-200 text-ink-700 px-4 py-2 rounded-full shadow-sm">
+        <i data-lucide="radar" class="w-4 h-4 text-brand-600" aria-hidden="true"></i>
+        <span id="breadcrumb-label">Cek Risiko</span>
+      </span>
+    </div>
+  </header>
+
+  <main class="relative z-10 max-w-6xl mx-auto py-8 sm:py-10 px-4 sm:px-6 lg:px-8">
+    <div class="reveal flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+      <div>
+        <h1 id="page-title" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-ink-900">Kenali Risiko Usahamu</h1>
+        <p id="page-desc" class="text-sm text-ink-500 mt-1.5 max-w-lg">Pilih jenis usahamu untuk melihat bahaya yang mengintai dan langkah yang bisa kamu ambil.</p>
+      </div>
+      <button id="btn-print" class="no-print hidden shrink-0 inline-flex items-center gap-2 text-xs font-semibold bg-ink-900 text-white px-4 py-2.5 rounded-xl shadow-sm hover:bg-ink-800 transition">
+        <i data-lucide="printer" class="w-4 h-4"></i> Cetak / Simpan Hasil
+      </button>
+    </div>
+
+    <!-- CARDS -->
+    <div id="dynamic-view" class="view-container"></div>
+
+    <!-- DETAIL / INFOGRAFIS -->
+    <div id="view-detail" class="view-container view-hidden space-y-5">
+
+      <!-- Skor Risiko Usahamu -->
+      <section class="surface reveal rounded-3xl p-6 sm:p-7">
+        <div class="flex flex-col md:flex-row md:items-center gap-6">
+          <div class="flex items-center gap-4 md:w-64 shrink-0">
+            <span id="score-badge" class="icon-badge !w-14 !h-14 !rounded-2xl shrink-0"><i data-lucide="gauge" class="w-7 h-7"></i></span>
+            <div>
+              <p class="text-xs font-semibold text-ink-500">Skor Risiko Usahamu</p>
+              <p id="score-label" class="text-2xl font-extrabold text-ink-900 leading-tight">—</p>
+            </div>
+          </div>
+          <div class="flex-1 w-full">
+            <div class="score-track mt-2 mb-3">
+              <span id="score-marker" class="score-marker" style="left: 0%;"></span>
+            </div>
+            <div class="flex justify-between text-[11px] font-semibold text-ink-500">
+              <span>Rendah</span><span>Sedang</span><span>Tinggi</span>
+            </div>
+            <p id="score-desc" class="text-sm text-ink-600 mt-3 leading-relaxed"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Kebutuhan Proteksi -->
+      <section class="surface reveal rounded-3xl p-6 sm:p-7">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+          <div class="flex items-center gap-3">
+            <span class="icon-badge bg-indigo-500/12 text-indigo-600"><i data-lucide="calculator" class="w-5 h-5"></i></span>
+            <div>
+              <h2 class="font-bold text-lg text-ink-900 leading-tight">Berapa Alat Pemadam yang Kamu Butuhkan?</h2>
+              <p class="text-xs text-ink-500">Masukkan luas tempatmu, hitungan berubah otomatis</p>
+            </div>
+          </div>
+          <div class="md:w-56 no-print">
+            <label class="block text-xs font-semibold text-ink-600 mb-1.5">Luas Ruangan (m²)</label>
+            <input type="number" id="area-input" min="1" step="1" value="200"
+              class="w-full field rounded-xl px-4 py-2.5 text-sm font-mono">
+          </div>
+        </div>
+
+        <div id="result-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6"></div>
+        <p class="text-[11px] text-ink-400 mt-4 leading-relaxed" id="hazard-note"></p>
+        <p class="text-[11px] text-ink-400 mt-1 leading-relaxed">
+          * Mengacu praktik umum Permenaker No.4/1980 &amp; SNI 03-3987 (APAR), SNI 03-3985 &amp; NFPA 72 (smoke detector), NFPA 13 (sprinkler).
+          Angka indikatif — validasi final oleh perencana proteksi kebakaran bersertifikat.
+        </p>
+      </section>
+
+      <!-- 2 kolom -->
+      <div class="detail-grid">
+        <div class="detail-col">
+          <section class="surface reveal rounded-3xl p-6 sm:p-7">
+            <div class="sec-head">
+              <span class="icon-badge bg-red-500/12 text-red-600"><i data-lucide="triangle-alert" class="w-5 h-5"></i></span>
+              <div>
+                <h2 class="font-bold text-lg text-ink-900 leading-tight">Bahaya yang Mengintai di Tempatmu</h2>
+                <p class="text-xs text-ink-500">Kenali sumber api & akibatnya bila dibiarkan</p>
+              </div>
+            </div>
+            <div id="hazard-list" class="grid grid-cols-1 gap-3"></div>
+          </section>
+        </div>
+
+        <div class="detail-col">
+          <section class="surface reveal rounded-3xl p-6 sm:p-7">
+            <div class="sec-head">
+              <span class="icon-badge bg-blue-500/12 text-blue-600"><i data-lucide="fire-extinguisher" class="w-5 h-5"></i></span>
+              <div>
+                <h2 class="font-bold text-lg text-ink-900 leading-tight">Pemadam yang Cocok untukmu</h2>
+                <p class="text-xs text-ink-500">Pilih media yang tepat sesuai bahaya</p>
+              </div>
+            </div>
+            <div id="apar-list" class="grid grid-cols-1 gap-3"></div>
+          </section>
+
+          <section class="surface reveal rounded-3xl p-6 sm:p-7">
+            <div class="sec-head">
+              <span class="icon-badge bg-green-500/12 text-green-600"><i data-lucide="trending-up" class="w-5 h-5"></i></span>
+              <div>
+                <h2 class="font-bold text-lg text-ink-900 leading-tight">Langkah Menurunkan Risiko</h2>
+                <p class="text-xs text-ink-500">Aksi nyata yang bisa kamu lakukan</p>
+              </div>
+            </div>
+            <div id="improve-list" class="grid grid-cols-1 gap-2.5"></div>
+          </section>
+        </div>
+      </div>
+
+      <p class="no-print text-center text-[11px] text-ink-400 pt-1 pb-4">
+        Hasil ini bersifat indikatif untuk membantumu memahami risiko. Konsultasikan dedngan ahli proteksi kebakaran untuk penilaian resmi.
+      </p>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+
+      const dynamicView = document.getElementById('dynamic-view');
+      const viewDetail = document.getElementById('view-detail');
+      const pageTitle = document.getElementById('page-title');
+      const pageDesc = document.getElementById('page-desc');
+      const breadcrumbLabel = document.getElementById('breadcrumb-label');
+      const btnBack = document.getElementById('btn-back');
+      const btnPrint = document.getElementById('btn-print');
+      const hazardList = document.getElementById('hazard-list');
+      const hazardNote = document.getElementById('hazard-note');
+      const aparList = document.getElementById('apar-list');
+      const improveList = document.getElementById('improve-list');
+      const areaInput = document.getElementById('area-input');
+      const resultGrid = document.getElementById('result-grid');
+      const scoreBadge = document.getElementById('score-badge');
+      const scoreLabel = document.getElementById('score-label');
+      const scoreMarker = document.getElementById('score-marker');
+      const scoreDesc = document.getElementById('score-desc');
+
+      let hierarchy, occupancyData, coverageByClass, aparLibrary;
+      try {
+        const res = await fetch('data.json');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        hierarchy = data.hierarchy;
+        occupancyData = data.occupancyData;
+        coverageByClass = data.coverageByClass;
+        aparLibrary = data.aparLibrary;
+      } catch (err) {
+        dynamicView.innerHTML =
+          `<div class="surface rounded-3xl p-6 text-sm text-red-600">
+             Gagal memuat <b>data.json</b> (${err.message}).<br>
+             Jalankan lewat server lokal, contoh: <code>python -m http.server</code> lalu buka <code>http://localhost:8000</code>.
+           </div>`;
+        return;
+      }
+
+      const scoreMeta = {
+        light:    { label: 'Rendah', pct: 18, badge: 'bg-green-500/12 text-green-600',
+          desc: 'Risiko kebakaran di usahamu tergolong rendah. Tetap lakukan perawatan rutin dan pastikan alat pemadam dasar tersedia.' },
+        ordinary: { label: 'Sedang', pct: 50, badge: 'bg-amber-500/12 text-amber-600',
+          desc: 'Risiko kebakaran di usahamu tergolong sedang. Ada beberapa sumber bahaya yang perlu perhatian khusus — perhatikan langkah di bawah.' },
+        high:     { label: 'Tinggi', pct: 84, badge: 'bg-red-500/12 text-red-600',
+          desc: 'Risiko kebakaran di usahamu tergolong tinggi. Segera lengkapi proteksi & prosedur keselamatan — sangat disarankan konsultasi dengan ahli.' }
+      };
+
+      let currentLevel = 'main';
+      let selectedMainKey = null;
+      let selectedSubKey = null;
+      let selectedOccupancyId = null;
+
+      function renderCards(dataObj) {
+        pageTitle.innerText = dataObj.title;
+        pageDesc.innerText = dataObj.desc;
+        breadcrumbLabel.innerText = dataObj.breadcrumb;
+        btnPrint.classList.add('hidden');
+
+        const isThreeCol = dataObj.items.length === 3 && currentLevel === 'main';
+        let html = `<div class="cards-grid${isThreeCol ? ' cols-3' : ''}">`;
+
+        dataObj.items.forEach((item, idx) => {
+          const countBadge = item.count
+            ? `<span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-600 bg-brand-50 border border-brand-100 px-2.5 py-1 rounded-full mt-3.5">
+                <i data-lucide="layers" class="w-3.5 h-3.5"></i>${item.count}
+              </span>` : '';
+
+          html += `
+            <button type="button" data-id="${item.id}" data-haschild="${item.hasChild || false}"
+              class="select-card reveal p-7 sm:p-8" style="transition-delay: ${idx * 60}ms">
+              <div class="flex items-start gap-4 sm:gap-6">
+                <span class="icon-badge bg-brand-500/12 text-brand-600 shrink-0 !w-14 !h-14 sm:!w-16 sm:!h-16 !rounded-2xl">
+                  <i data-lucide="${item.icon}" class="w-7 h-7 sm:w-8 sm:h-8"></i>
+                </span>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-extrabold text-ink-900 text-lg sm:text-xl leading-snug">${item.name}</h3>
+                  <p class="text-xs sm:text-sm text-ink-500 mt-2 leading-relaxed">${item.desc}</p>
+                  ${countBadge}
+                </div>
+              </div>
+            </button>`;
+        });
+
+        html += '</div>';
+        dynamicView.innerHTML = html;
+        lucide.createIcons();
+
+        requestAnimationFrame(() => {
+          dynamicView.querySelectorAll('.reveal').forEach((el, i) => {
+            setTimeout(() => el.classList.add('in'), i * 60 + 30);
+          });
+        });
+        attachCardEvents();
+      }
+
+      function spawnRipple(card, e) {
+        const rect = card.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+        ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+        card.appendChild(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove());
+      }
+
+      function attachCardEvents() {
+        dynamicView.querySelectorAll('.select-card').forEach(card => {
+          card.addEventListener('click', (e) => {
+            spawnRipple(card, e);
+            card.classList.add('just-clicked');
+            setTimeout(() => card.classList.remove('just-clicked'), 550);
+
+            const id = card.getAttribute('data-id');
+            const hasChild = card.getAttribute('data-haschild') === 'true';
+
+            setTimeout(() => {
+              if (currentLevel === 'main') {
+                selectedMainKey = id; currentLevel = 'sub';
+                renderCards(hierarchy.sub[selectedMainKey]);
+              } else if (currentLevel === 'sub') {
+                if (hasChild) {
+                  selectedSubKey = id; currentLevel = 'subChild';
+                  renderCards(hierarchy.subChild[selectedSubKey]);
+                } else {
+                  const itemName = hierarchy.sub[selectedMainKey].items.find(i => i.id === id).name;
+                  openDetail(id, itemName);
+                }
+              } else if (currentLevel === 'subChild') {
+                const itemName = hierarchy.subChild[selectedSubKey].items.find(i => i.id === id).name;
+                openDetail(id, itemName);
+              }
+            }, 160);
+          });
+        });
+      }
+
+      function renderScore(occupancyId) {
+        const data = occupancyData[occupancyId];
+        const m = scoreMeta[data.hazardClass] || scoreMeta.ordinary;
+        scoreBadge.className = 'icon-badge !w-14 !h-14 !rounded-2xl shrink-0 ' + m.badge;
+        scoreLabel.innerText = m.label;
+        scoreDesc.innerText = m.desc;
+        requestAnimationFrame(() => { scoreMarker.style.left = m.pct + '%'; });
+      }
+
+      function renderHazards(occupancyId) {
+        const data = occupancyData[occupancyId];
+        hazardList.innerHTML = '';
+        if (!data) {
+          hazardList.innerHTML = `<p class="text-sm text-ink-400">Data hazard belum tersedia.</p>`;
+          return;
+        }
+
+        hazardList.innerHTML = data.hazards.map(h => `
+          <div class="hazard-card">
+            <div class="hazard-top">
+              <span class="hazard-ic"><i data-lucide="${h.icon || 'flame'}" class="w-5 h-5"></i></span>
+              <div class="min-w-0">
+                <p class="font-bold text-sm text-ink-900 leading-tight">${h.title}</p>
+                <p class="text-xs text-ink-500 mt-1 leading-relaxed">${h.desc}</p>
+              </div>
+            </div>
+            ${h.effect ? `<div class="hazard-effect">
+              <i data-lucide="alert-triangle" class="w-3.5 h-3.5 shrink-0 mt-0.5"></i>
+              <span><b>Kalau dibiarkan:</b> ${h.effect}</span>
+            </div>` : ''}
+          </div>`).join('');
+        lucide.createIcons();
+      }
+
+      function renderApar(occupancyId) {
+        const data = occupancyData[occupancyId];
+        aparList.innerHTML = '';
+        if (!data || !data.apar) return;
+
+        aparList.innerHTML = data.apar.map((key, idx) => {
+          const a = aparLibrary[key];
+          if (!a) return '';
+          const primary = idx === 0
+            ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-blue-600 text-white px-2 py-0.5 rounded-full ml-2">Utama</span>`
+            : '';
+          return `
+            <div class="apar-card">
+              <span class="apar-ic"><i data-lucide="${a.icon}" class="w-5 h-5"></i></span>
+              <div class="min-w-0">
+                <p class="font-bold text-sm text-ink-900 leading-tight flex items-center flex-wrap">${a.name}${primary}</p>
+                <p class="text-[11px] font-mono font-semibold text-blue-600 mt-0.5">Kelas ${a.classes}</p>
+                <p class="text-xs text-ink-500 mt-1 leading-relaxed">${a.desc}</p>
+              </div>
+            </div>`;
+        }).join('');
+        lucide.createIcons();
+      }
+
+      function renderImprovements(occupancyId) {
+        const data = occupancyData[occupancyId];
+        improveList.innerHTML = '';
+        if (!data || !data.improvements) return;
+        improveList.innerHTML = data.improvements.map(t => `
+          <div class="improve-item">
+            <span class="improve-ic"><i data-lucide="check" class="w-3 h-3"></i></span>
+            <span>${t}</span>
+          </div>`).join('');
+        lucide.createIcons();
+      }
+
+      function calcProtection() {
+        const area = parseFloat(areaInput.value);
+        const data = occupancyData[selectedOccupancyId];
+        if (!data) return;
+
+        if (isNaN(area) || area <= 0) {
+          resultGrid.innerHTML = `<p class="text-sm text-ink-400 col-span-3">Masukkan luas ruangan yang valid.</p>`;
+          hazardNote.innerText = '';
+          return;
+        }
+
+        const cov = coverageByClass[data.hazardClass];
+        const apar = Math.max(1, Math.ceil(area / cov.apar));
+        const sprinkler = Math.max(1, Math.ceil(area / cov.sprinkler));
+        const smoke = Math.max(1, Math.ceil(area / cov.smoke));
+
+        hazardNote.innerText =
+          `Kelas bahaya "${cov.label}" → 1 APAR / ${cov.apar} m², 1 sprinkler / ${cov.sprinkler} m², 1 smoke detector / ${cov.smoke} m².`;
+
+        const cards = [
+          { icon: 'fire-extinguisher', color: 'red',   num: apar,      label: 'Unit APAR',      sub: `1 unit / ${cov.apar} m²` },
+          { icon: 'shower-head',       color: 'blue',  num: sprinkler, label: 'Head Sprinkler', sub: `1 head / ${cov.sprinkler} m²` },
+          { icon: 'radio',            color: 'amber', num: smoke,     label: 'Smoke Detector', sub: `1 unit / ${cov.smoke} m²` }
+        ];
+
+        resultGrid.innerHTML = cards.map(c => `
+          <div class="stat-card">
+            <span class="icon-badge bg-${c.color}-500/12 text-${c.color}-600 shrink-0"><i data-lucide="${c.icon}" class="w-5 h-5"></i></span>
+            <div>
+              <div class="stat-num text-ink-900">${c.num}</div>
+              <div class="text-xs font-semibold text-ink-700 mt-1">${c.label}</div>
+              <div class="text-[11px] text-ink-400">${c.sub}</div>
+            </div>
+          </div>`).join('');
+        lucide.createIcons();
+      }
+
+      areaInput.addEventListener('input', calcProtection);
+      btnPrint.addEventListener('click', () => window.print());
+
+      function openDetail(occupancyId, occupationName) {
+        currentLevel = 'detail';
+        selectedOccupancyId = occupancyId;
+        breadcrumbLabel.innerText = 'Hasil Cek Risiko';
+        pageTitle.innerText = occupationName;
+        const intro = occupancyData[occupancyId] && occupancyData[occupancyId].intro;
+        pageDesc.innerText = intro || 'Ini gambaran risiko, rekomendasi pemadam & langkah yang bisa kamu ambil.';
+        btnPrint.classList.remove('hidden');
+
+        renderScore(occupancyId);
+        renderHazards(occupancyId);
+        renderApar(occupancyId);
+        renderImprovements(occupancyId);
+        calcProtection();
+
+        dynamicView.classList.add('view-hidden');
+        viewDetail.classList.remove('view-hidden');
+        viewDetail.style.display = '';
+
+        requestAnimationFrame(() => {
+          viewDetail.querySelectorAll('.reveal').forEach((el, i) => {
+            el.classList.remove('in');
+            setTimeout(() => el.classList.add('in'), i * 90 + 30);
+          });
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      btnBack.addEventListener('click', (e) => {
+        if (currentLevel === 'detail') {
+          e.preventDefault();
+          viewDetail.classList.add('view-hidden');
+          dynamicView.classList.remove('view-hidden');
+          if (selectedSubKey && hierarchy.subChild[selectedSubKey]) {
+            currentLevel = 'subChild';
+            renderCards(hierarchy.subChild[selectedSubKey]);
+          } else {
+            currentLevel = 'sub';
+            renderCards(hierarchy.sub[selectedMainKey]);
+          }
+        } else if (currentLevel === 'subChild') {
+          e.preventDefault();
+          currentLevel = 'sub'; selectedSubKey = null;
+          renderCards(hierarchy.sub[selectedMainKey]);
+        } else if (currentLevel === 'sub') {
+          e.preventDefault();
+          currentLevel = 'main'; selectedMainKey = null;
+          renderCards(hierarchy.main);
+        } else {
+          window.history.back();
+        }
+      });
+
+      renderCards(hierarchy.main);
+    });
+  </script>
+</body>
+</html>
