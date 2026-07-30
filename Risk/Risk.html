@@ -360,8 +360,9 @@
     </div>
   </main>
 
+  <script src="data.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
 
       const dynamicView = document.getElementById('dynamic-view');
@@ -382,20 +383,16 @@
       const scoreMarker = document.getElementById('score-marker');
       const scoreDesc = document.getElementById('score-desc');
 
-      let hierarchy, occupancyData, coverageByClass, aparLibrary;
-      try {
-        const res = await fetch('data.json');
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        hierarchy = data.hierarchy;
-        occupancyData = data.occupancyData;
-        coverageByClass = data.coverageByClass;
-        aparLibrary = data.aparLibrary;
-      } catch (err) {
+      const data = window.RISK_DATA || {};
+      const hierarchy = data.hierarchy;
+      const occupancyData = data.occupancyData;
+      const coverageByClass = data.coverageByClass;
+      const aparLibrary = data.aparLibrary;
+
+      if (!hierarchy || !occupancyData) {
         dynamicView.innerHTML =
           `<div class="surface rounded-3xl p-6 text-sm text-red-600">
-             Gagal memuat <b>data.json</b> (${err.message}).<br>
-             Jalankan lewat server lokal, contoh: <code>python -m http.server</code> lalu buka <code>http://localhost:8000</code>.
+             Gagal memuat <b>data.js</b>. Pastikan file data.js tersedia.
            </div>`;
         return;
       }

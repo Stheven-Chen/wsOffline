@@ -1,0 +1,712 @@
+window.RISK_DATA = {
+  "coverageByClass": {
+    "light": { "apar": 200, "sprinkler": 20, "smoke": 90, "label": "Ringan" },
+    "ordinary": {
+      "apar": 150,
+      "sprinkler": 12,
+      "smoke": 80,
+      "label": "Sedang"
+    },
+    "high": { "apar": 100, "sprinkler": 9, "smoke": 65, "label": "Tinggi" }
+  },
+  "aparLibrary": {
+    "powder": {
+      "name": "Dry Chemical Powder",
+      "icon": "spray-can",
+      "classes": "A · B · C",
+      "desc": "Serbaguna untuk bahan padat, cairan mudah terbakar, & listrik."
+    },
+    "co2": {
+      "name": "CO₂ (Karbon Dioksida)",
+      "icon": "wind",
+      "classes": "B · C",
+      "desc": "Tanpa residu, ideal untuk panel & peralatan listrik/elektronik."
+    },
+    "foam": {
+      "name": "Foam (AFFF)",
+      "icon": "droplets",
+      "classes": "A · B",
+      "desc": "Menyelimuti cairan mudah terbakar (oli, solar, bensin)."
+    },
+    "wet": {
+      "name": "Wet Chemical",
+      "icon": "flame-kindling",
+      "classes": "K",
+      "desc": "Khusus minyak goreng & lemak dapur (deep fryer)."
+    },
+    "classd": {
+      "name": "Dry Powder Kelas D",
+      "icon": "shield",
+      "classes": "D",
+      "desc": "Khusus logam mudah terbakar / molten metal."
+    }
+  },
+  "occupancyData": {
+    "hotel": {
+      "hazardClass": "ordinary",
+      "intro": "Sebagai pemilik hotel/penginapan, dapur dan kepadatan tamu jadi titik paling rawan. Berikut yang perlu kamu perhatikan.",
+      "hazards": [
+        {
+          "title": "Kitchen",
+          "desc": "Kompor & minyak panas di area dapur.",
+          "effect": "Minyak goreng yang dibiarkan di suhu tinggi bisa menyala sendiri tanpa perlu percikan. Api dapur seperti ini paling sering muncul saat jam sibuk ketika staf sedang kewalahan dan wajan ditinggal sebentar.",
+          "icon": "cooking-pot"
+        },
+        {
+          "title": "Instalasi Gas",
+          "desc": "Jaringan LPG / gas kota bertekanan.",
+          "effect": "Gas yang bocor tidak langsung terbakar ia mengumpul diam-diam di lantai dapur karena lebih berat dari udara, lalu menyambar hebat begitu ada nyala kompor atau saklar dinyalakan.",
+          "icon": "flame"
+        },
+        {
+          "title": "Ducting Exhaust",
+          "desc": "Minyak menumpuk di saluran buang.",
+          "effect": "Kerak minyak di dalam cerobong adalah bahan bakar tersembunyi. Sekali tersulut, api merambat cepat di sepanjang saluran, menembus dinding dan plafon, sebelum staf sempat sadar.",
+          "icon": "fan"
+        },
+        {
+          "title": "Okupansi 24 Jam",
+          "desc": "Banyak tamu & aktivitas nonstop.",
+          "effect": "Tamu belum tentu hafal jalur evakuasi. Kebakaran malam hari sangat berbahaya karena asap menyebar duluan dan orang terbangun dalam kondisi bingung dan panik.",
+          "icon": "users"
+        },
+        {
+          "title": "Kelistrikan",
+          "desc": "Beban AC sentral & lift besar.",
+          "effect": "Panel listrik yang menanggung AC dan lift terus-menerus, lama-lama panas dan sambungannya mengendur. Titik yang longgar inilah yang biasanya membara diam-diam di balik dinding sebelum akhirnya menyala.",
+          "icon": "zap"
+        }
+      ],
+      "apar": ["wet", "co2", "powder"],
+      "improvements": [
+        "Pasang sistem pemadam otomatis (hood suppression) tepat di atas kompor & penggorengan, ini memadamkan api minyak dalam hitungan detik, jauh sebelum staf sempat mengambil APAR.",
+        "Jadwalkan pembersihan cerobong dapur secara berkala, minyak yang menumpuk adalah pemicu kebakaran dapur yang paling sering terlewat karena tidak terlihat dari luar.",
+        "Pasang detektor gas dengan katup penutup otomatis, sehingga aliran LPG langsung berhenti sendiri saat bocor meski dapur sedang kosong.",
+        "Latih seluruh shift, untuk memandu evakuasi tamu dan memakai APAR, karena saat kebakaran tidak ada waktu untuk belajar."
+      ]
+    },
+    "rumah_tinggal": {
+      "hazardClass": "light",
+      "intro": "Untuk rumah tinggal, sebagian besar kebakaran berawal dari listrik dan dapur. Kabar baiknya, risikonya bisa ditekan dengan langkah sederhana.",
+      "hazards": [
+        {
+          "title": "Instalasi Listrik",
+          "desc": "Beban listrik rumah & kabel lama.",
+          "effect": "Kabel yang sudah belasan tahun, isolasinya getas dan mudah mengelupas. Gesekan atau gigitan tikus di plafon bisa membuat kabel beradu dan memercik, dan kebakaran dari dalam dinding baru ketahuan setelah membesar.",
+          "icon": "zap"
+        },
+        {
+          "title": "Kompor & LPG",
+          "desc": "Dapur dengan tabung gas.",
+          "effect": "Selang gas yang retak atau regulator yang tidak rapat sering luput dari perhatian. Kebocoran kecil terkumpul di dapur tertutup dan menyambar begitu kompor dinyalakan keesokan paginya.",
+          "icon": "flame"
+        },
+        {
+          "title": "Korsleting Elektronik",
+          "desc": "Colokan menumpuk / overload.",
+          "effect": "Satu stop kontak yang dicabang ke banyak alat berdaya besar akan panas terus-menerus. Panas inilah yang perlahan melelehkan colokan sampai memercikkan api, biasanya saat rumah ditinggal pergi.",
+          "icon": "plug"
+        },
+        {
+          "title": "Barang Mudah Terbakar",
+          "desc": "Penyimpanan barang rumah.",
+          "effect": "Tumpukan kardus, kain, atau kertas di dekat stop kontak atau dapur membuat api kecil punya 'bahan bakar' untuk cepat membesar sebelum sempat dipadamkan.",
+          "icon": "package"
+        }
+      ],
+      "apar": ["powder", "co2"],
+      "improvements": [
+        "Panggil teknisi untuk memeriksa instalasi listrik jika usianya sudah lebih dari 10 tahun, dan ganti kabel yang isolasinya sudah mengeras atau retak.",
+        "Gunakan selang dan regulator ber-SNI, lalu cek kebocoran dengan air sabun di sambungan — muncul gelembung berarti bocor dan harus segera diganti.",
+        "Pasang detektor asap kecil di dapur dan dekat kamar tidur; alat murah ini yang membangunkanmu saat kebakaran terjadi tengah malam.",
+        "Hindari mencabang satu stop kontak untuk banyak alat berdaya besar sekaligus, terutama saat rumah ditinggal pergi."
+      ]
+    },
+    "kantor": {
+      "hazardClass": "light",
+      "intro": "Di kantor, perangkat elektronik dan tumpukan dokumen jadi perhatian utama. Berikut cara menjaga tempat kerjamu tetap aman.",
+      "hazards": [
+        {
+          "title": "Beban Listrik",
+          "desc": "Komputer, server, & UPS.",
+          "effect": "Perangkat seperti server dan UPS menyala 24 jam dan menghasilkan panas terus-menerus. Jika ruangan kurang sirkulasi udara, panas menumpuk sampai memicu korsleting, hal ini sering terjadi di akhir pekan saat kantor kosong.",
+          "icon": "server"
+        },
+        {
+          "title": "Kabel Overload",
+          "desc": "Kabel & colokan berlebih.",
+          "effect": "Kabel yang berjejalan di bawah meja dan tersembunyi di balik lemari mudah terjepit dan tergerus. Sambungan yang longgar dari colokan bertumpuk memanas pelan-pelan sampai membakar bahan di sekitarnya.",
+          "icon": "plug"
+        },
+        {
+          "title": "Tumpukan Kertas",
+          "desc": "Dokumen & arsip mudah terbakar.",
+          "effect": "Ruang arsip yang penuh kertas ibarat gudang bahan bakar. Api kecil dari korsleting bisa berubah jadi kebakaran besar hanya dalam hitungan menit karena kertas menyala sangat cepat.",
+          "icon": "file-text"
+        },
+        {
+          "title": "Pantry",
+          "desc": "Dapur kecil / dispenser.",
+          "effect": "Dispenser, pemanas air, atau microwave yang dibiarkan menyala setelah jam kerja adalah pemicu api yang mudah terlewat, apalagi kalau diletakkan berdekatan dengan tisu atau kardus.",
+          "icon": "coffee"
+        }
+      ],
+      "apar": ["co2", "powder"],
+      "improvements": [
+        "Gunakan APAR CO₂ di ruang server, APAR ini memadamkan tanpa meninggalkan residu, jadi perangkat elektronikmu tidak ikut rusak saat pemadaman.",
+        "Rapikan dan beri label pada kabel, dan hindari colokan bertumpuk di satu titik agar tidak ada sambungan yang diam-diam memanas.",
+        "Simpan dokumen penting di lemari tahan api sehingga arsipmu tetap selamat meski terjadi kebakaran.",
+        "Pastikan ruang server punya pendingin yang memadai, dan biasakan mematikan alat pantry setelah jam kerja."
+      ]
+    },
+    "gudang": {
+      "hazardClass": "ordinary",
+      "intro": "Gudangmu menyimpan banyak barang di area luas — kontrol akses dan tata letak jadi kunci keselamatannya.",
+      "hazards": [
+        {
+          "title": "Kelistrikan",
+          "desc": "Panel & instalasi area luas.",
+          "effect": "Di ruang seluas gudang, titik panas pada panel atau kabel mudah luput karena tidak ada orang yang lewat setiap saat. Kebakaran bisa membara berjam-jam di sudut yang jarang dikunjungi sebelum akhirnya terlihat.",
+          "icon": "zap"
+        },
+        {
+          "title": "Sifat Barang",
+          "desc": "Ada barang yang mudah terbakar.",
+          "effect": "Kalau isi gudang tercampur antara barang biasa dan barang mudah terbakar tanpa pemisahan, satu titik api dapat dengan cepat menjalar ke seluruh tempat dan nyaris mustahil dipadamkan sebelum semua ludes.",
+          "icon": "boxes"
+        },
+        {
+          "title": "Catatan Barang",
+          "desc": "Keluar-masuk barang tak tercatat.",
+          "effect": "Tanpa pencatatan, barang berbahaya atau mudah terbakar bisa masuk dan tersimpan bertahun-tahun tanpa ada yang tahu — sampai jadi biang kebakaran yang sumbernya sulit dilacak.",
+          "icon": "clipboard-list"
+        },
+        {
+          "title": "Catatan Orang",
+          "desc": "Keluar-masuk orang tak terkontrol.",
+          "effect": "Akses yang bebas keluar-masuk membuka peluang kelalaian, seperti orang merokok di dalam, sampai risiko pembakaran yang disengaja.",
+          "icon": "user-check"
+        },
+        {
+          "title": "Pengawasan CCTV",
+          "desc": "Area penyimpanan luas.",
+          "effect": "Tanpa pemantauan, kebakaran kecil di jam sepi baru diketahui setelah asap keluar dari atap sehingga api sudah terlalu besar untuk ditangani sendiri.",
+          "icon": "cctv"
+        },
+        {
+          "title": "Tumpukan Tinggi",
+          "desc": "Rak tinggi & padat.",
+          "effect": "Api pada barang tumpukan tinggi, cepat naik ke atas dan tak terjangkau APAR dari bawah. Rak yang rapat juga menghalangi semprotan sprinkler mencapai titik api di bagian dalam.",
+          "icon": "layers"
+        }
+      ],
+      "apar": ["powder", "foam", "co2"],
+      "improvements": [
+        "Beri jarak antar rak dan batasi tinggi tumpukan agar air sprinkler dan petugas pemadam bisa menjangkau titik api di bagian dalam.",
+        "Pisahkan barang mudah terbakar ke area khusus yang jauh dari panel listrik dan sumber panas, supaya api tidak punya jalan untuk cepat menjalar.",
+        "Pasang sprinkler termasuk di sela-sela rak tinggi (in-rack sprinkler), karena sprinkler plafon saja tidak menjangkau api yang menyala di dalam tumpukan.",
+        "Terapkan pencatatan keluar-masuk barang dan pasang CCTV, agar barang berbahaya terdeteksi lebih awal dan kebakaran kecil cepat ketahuan."
+      ]
+    },
+    "kertas": {
+      "hazardClass": "high",
+      "intro": "Usaha kertas punya risiko tinggi karena bahan bakunya sangat mudah terbakar. Proteksi ekstra sangat penting di sini.",
+      "hazards": [
+        {
+          "title": "Bahan Mudah Terbakar",
+          "desc": "Bahan baku kertas menumpuk.",
+          "effect": "Gulungan dan tumpukan kertas dapat terbakar dengan sangat cepat sehingga selisih beberapa menit saja bisa membuat api tidak tertangani dan menyebabkan pabrik ludes terbakar.",
+          "icon": "flame"
+        },
+        {
+          "title": "Penanganan Bahan",
+          "desc": "Tumpukan & pergerakan bahan.",
+          "effect": "Forklift dan alat angkut logam dapat memercikkan bunga api di ruang penuh kertas dan debu, sehingga percikan kecil saja sudah cukup untuk memulai kebakaran.",
+          "icon": "forklift"
+        },
+        {
+          "title": "Debu Kertas",
+          "desc": "Partikel halus beterbangan.",
+          "effect": "Debu kertas halus yang beterbangan bisa terbakar seketika (flash fire) begitu tersulut, menciptakan gelombang api yang menyambar seluruh ruangan dalam sekejap.",
+          "icon": "wind"
+        },
+        {
+          "title": "Listrik Mesin",
+          "desc": "Beban mesin produksi besar.",
+          "effect": "Motor mesin produksi yang bekerja penuh seharian dapat mengalami panas berlebih. Api yang di hasilkand ari korsleting di mesin yang dikelilingi bahan baku kertas langsung memiliki bahan bakar melimpah untuk membesar.",
+          "icon": "zap"
+        }
+      ],
+      "apar": ["powder", "foam", "co2"],
+      "improvements": [
+        "Pasang sistem penyedot debu (dust collector) dan bersihkan debu kertas rutin, karena penumpukan debu adalah pemicu flash fire yang paling berbahaya sekaligus paling sering diabaikan.",
+        "Pisahkan gudang bahan baku dari area produksi dengan dinding tahan api, sehingga kebakaran di satu sisi tidak langsung melahap seluruh stok.",
+        "Sediakan hydrant dan sprinkler berkapasitas besar, api dengan beban bahan bakar setinggi itu, APAR saja tidak akan cukup untuk memadamkan api.",
+        "Buatkan sistem izin kerja panas (hot work permit) untuk pengelasan atau gerinda, agar tidak ada pekerjaan memercik api dilakukan sembarangan di dekat bahan baku."
+      ]
+    },
+    "textile": {
+      "hazardClass": "high",
+      "intro": "Di industri tekstil, serat dan debu benang membuat risiko kebakaran tinggi. Kebersihan area jadi garda depan keselamatanmu.",
+      "hazards": [
+        {
+          "title": "Bahan Baku",
+          "desc": "Serat & kain mudah terbakar.",
+          "effect": "Serat dan kain dapat dengan cepat terbakar seperti kertas, dan gulungan kain yang padat sulit dipadamkan sampai ke bagian dalamnya karena air tidak mudah meresap.",
+          "icon": "shirt"
+        },
+        {
+          "title": "Banyak Bahan Terbakar",
+          "desc": "Isi ruangan mudah terbakar.",
+          "effect": "Ruang produksi yang penuh kain dari lantai ke plafon berarti api punya bahan bakar tak terbatas, sehingga kebakaran kecil bisa berubah jadi bencana besar hanya dalam hitungan menit.",
+          "icon": "flame"
+        },
+        {
+          "title": "Debu Benang",
+          "desc": "Debu garment beterbangan.",
+          "effect": "Serbuk benang halus (lint) yang menempel di mesin dan beterbangan di udara bisa menyambar seketika. Dalam konsentrasi tinggi, debu ini bahkan berpotensi meledak saat bertemu percikan.",
+          "icon": "wind"
+        },
+        {
+          "title": "Mesin Panas",
+          "desc": "Mesin jahit & pengering.",
+          "effect": "Mesin pengering dan setrika press bekerja pada suhu tinggi terus-menerus. Serat yang tersangkut di bagian panas mesin bisa membara pelan sampai menyala saat pabrik sudah tutup.",
+          "icon": "zap"
+        }
+      ],
+      "apar": ["powder", "co2", "foam"],
+      "improvements": [
+        "Pasang sistem penyedot debu dan bersihkan lint yang menempel di mesin secara rutin, karena tumpukan debu benang adalah bahan bakar sekaligus pemicu ledakan debu.",
+        "Pisahkan gudang bahan baku dari area mesin panas, sehingga sumber panas tidak bersentuhan langsung dengan tumpukan kain.",
+        "Lengkapi sprinkler dan hydrant yang memadai; mengingat beban bahan bakar yang besar, sistem pemadam otomatis sangat menentukan.",
+        "Jaga kebersihan area produksi setiap hari, pabrik tekstil yang bersih dari serat menganggur jauh lebih kecil risikonya."
+      ]
+    },
+    "chemical": {
+      "hazardClass": "high",
+      "intro": "Produk kimia menyimpan risiko tinggi dari cairan & uap mudah terbakar. Ventilasi dan pembumian sangat menentukan keselamatanmu.",
+      "hazards": [
+        {
+          "title": "Cairan Mudah Terbakar",
+          "desc": "Bahan kimia cair.",
+          "effect": "Banyak pelarut kimia dapat menyala pada suhu ruang biasa, sehingga tidak perlu panas tinggi, percikan kecil dari saklar atau gesekan pun sudah cukup untuk menyulutnya.",
+          "icon": "flask-conical"
+        },
+        {
+          "title": "Uap Mudah Terbakar",
+          "desc": "Uap bahan menguap ke udara.",
+          "effect": "Uap dari cairan menyebar tak terlihat dan mengumpul di area rendah tanpa ventilasi. Yang terbakar sebenarnya uapnya, bukan cairannya, dan begitu tersulut, apinya bisa menjalar ke wadah sumber.",
+          "icon": "cloud"
+        },
+        {
+          "title": "Listrik Statis",
+          "desc": "Muatan statis muncul.",
+          "effect": "Menuang cairan dari satu wadah ke wadah lain menimbulkan muatan statis. Loncatan listrik statis sekecil apa pun cukup untuk menyulut uap yang mengambang di sekitarnya.",
+          "icon": "zap"
+        },
+        {
+          "title": "Reaksi Kimia",
+          "desc": "Penyimpanan bahan berbahaya.",
+          "effect": "Dua bahan yang tidak boleh berdekatan namun tersimpan bersebelahan bisa bereaksi dan memicu panas atau api sendiri, tanpa perlu ada sumber nyala dari luar sama sekali.",
+          "icon": "biohazard"
+        }
+      ],
+      "apar": ["foam", "powder", "co2"],
+      "improvements": [
+        "Gunakan instalasi listrik anti-percikan (explosion-proof) di area penyimpanan cairan, karena saklar biasa saja bisa memicu ledakan uap.",
+        "Pasang ventilasi dan detektor uap agar uap mudah terbakar tidak sempat mengumpul sampai ke titik berbahaya.",
+        "Sediakan bak penampung tumpahan di bawah wadah cairan, supaya kebocoran tidak menyebar dan menciptakan genangan yang mudah tersulut.",
+        "Simpan bahan yang tidak cocok secara terpisah sesuai lembar data keselamatan (MSDS), dan pasang sistem pemadam foam di area cairan mudah terbakar."
+      ]
+    },
+    "plastik_injeksi": {
+      "hazardClass": "high",
+      "intro": "Pada proses injeksi/molding, panas mesin dan oli hidrolik jadi kombinasi rawan. Perawatan berkala menekan risikonya.",
+      "hazards": [
+        {
+          "title": "Mesin Panas",
+          "desc": "Tabung pemanas bersuhu tinggi.",
+          "effect": "Barrel pemanas beroperasi di suhu ratusan derajat. Sisa serpihan plastik yang menempel di sekitarnya bisa meleleh lalu terbakar, apalagi jika elemen pemanasnya rusak dan overheat.",
+          "icon": "thermometer"
+        },
+        {
+          "title": "Oli Hidrolik",
+          "desc": "Cairan hidrolik mudah terbakar.",
+          "effect": "Selang hidrolik bertekanan tinggi yang pecah bisa menyemburkan kabut oli halus. Kalau kabut ini mengenai barrel yang panas, ia menyala seketika seperti obor.",
+          "icon": "droplets"
+        },
+        {
+          "title": "Listrik Mesin",
+          "desc": "Beban listrik mesin injeksi.",
+          "effect": "Mesin injeksi menarik arus besar setiap siklusnya. Sambungan panel yang mengendur karena getaran mesin lama-lama memanas dan berpotensi memicu korsleting.",
+          "icon": "zap"
+        },
+        {
+          "title": "Sisa Plastik",
+          "desc": "Potongan plastik menumpuk.",
+          "effect": "Runner, reject, dan serpihan plastik yang menumpuk di lantai sekitar mesin jadi bahan bakar siap pakai kalau ada percikan atau tetesan oli panas.",
+          "icon": "package"
+        }
+      ],
+      "apar": ["powder", "co2", "foam"],
+      "improvements": [
+        "Periksa selang dan sambungan hidrolik secara berkala, dan segera bersihkan setiap tumpahan oli sebelum mengenai bagian mesin yang panas.",
+        "Pasang sensor suhu dan pengaman overheat pada barrel pemanas agar mesin berhenti sendiri saat suhu melampaui batas.",
+        "Jaga area sekitar mesin bersih dari sisa dan serpihan plastik, karena inilah bahan bakar terdekat kalau muncul percikan.",
+        "Lakukan perawatan berkala pada panel dan kencangkan sambungan listrik yang kendur akibat getaran mesin."
+      ]
+    },
+    "plastik_lembaran": {
+      "hazardClass": "high",
+      "intro": "Produksi lembaran/film plastik rawan dari listrik statis dan kebocoran oli. Pembumian yang baik sangat membantu.",
+      "hazards": [
+        {
+          "title": "Listrik Statis",
+          "desc": "Muatan statis di lembaran.",
+          "effect": "Film plastik yang bergesekan melewati roller berkecepatan tinggi menghasilkan muatan statis besar. Loncatan bunga api statis inilah yang bisa menyulut uap atau debu di sekitar jalur produksi.",
+          "icon": "zap"
+        },
+        {
+          "title": "Kebocoran Oli",
+          "desc": "Cairan hidrolik bocor.",
+          "effect": "Oli hidrolik yang menetes ke bagian mesin yang panas mudah menyala, dan api bisa langsung menjalar ke gulungan film yang berada di dekatnya.",
+          "icon": "droplets"
+        },
+        {
+          "title": "Perawatan Mesin",
+          "desc": "Risiko tidak melakukan maintenance mesin.",
+          "effect": "Maintenance mesin yang tidak berkala dapat berisiko tinggi, hal ini dapat menyebabkan malfunction mesin",
+          "icon": "wrench"
+        },
+        {
+          "title": "Gulungan Plastik",
+          "desc": "Roll film menumpuk.",
+          "effect": "Gulungan film yang padat menyala dengan cepat di permukaan tapi sulit dipadamkan sampai ke bagian dalamnya, sehingga api bisa hidup kembali setelah dikira padam.",
+          "icon": "layers"
+        }
+      ],
+      "apar": ["powder", "co2", "foam"],
+      "improvements": [
+        "Pasang static eliminator (ionizer bar) pada jalur film untuk menetralkan muatan statis sebelum sempat memercik.",
+        "Sambungkan grounding pada mesin dan roller, karena tanpa grounding muatan statis akan terus menumpuk.",
+        "Jauhkan gulungan film jadi dari sumber panas dan mesin, agar tidak menjadi bahan bakar kalau terjadi kebakaran.",
+        "Lakukan perawatan berkala pada mesin, matikan dan kunci mesin dengan benar sebelum disentuh teknisi."
+      ]
+    },
+    "besi_hotpress": {
+      "hazardClass": "high",
+      "intro": "Proses hotpress menghasilkan panas dan percikan tinggi. Menjauhkan bahan mudah terbakar jadi prioritasmu.",
+      "hazards": [
+        {
+          "title": "Proses Pemanasan",
+          "desc": "Sumber panas proses press.",
+          "effect": "Elemen dan cetakan press menyimpan panas tinggi bahkan setelah dimatikan. Bahan mudah terbakar yang terlanjur dekat dengan cetakan bisa menyala dari panas sisa ini.",
+          "icon": "thermometer"
+        },
+        {
+          "title": "Oli Hidrolik",
+          "desc": "Cairan hidrolik mudah terbakar.",
+          "effect": "Mesin press bekerja dengan tekanan hidrolik sangat tinggi. Kalau selang pecah, semburan kabut oli langsung menyala begitu mengenai zona panas mesin.",
+          "icon": "droplets"
+        },
+        {
+          "title": "Percikan Logam",
+          "desc": "Bunga api saat pengerjaan.",
+          "effect": "Gerinda dan pengelasan menerbangkan bunga api yang bisa terlempar beberapa meter, menyulut bahan mudah terbakar yang tampaknya berada di tempat aman.",
+          "icon": "sparkles"
+        },
+        {
+          "title": "Listrik Mesin",
+          "desc": "Beban mesin press besar.",
+          "effect": "Motor dan pemanas mesin press menarik arus besar terus-menerus. Getaran mesin yang mengendurkan sambungan listrik adalah pemicu korsleting yang umum.",
+          "icon": "zap"
+        }
+      ],
+      "apar": ["powder", "co2", "foam"],
+      "improvements": [
+        "Pasang pelindung/sekat panas dan jaga jarak aman antara mesin panas dengan bahan mudah terbakar.",
+        "Periksa selang hidrolik secara rutin dan pasang bak penampung untuk menangkap oli yang bocor sebelum mengenai zona panas.",
+        "Sediakan area khusus untuk pekerjaan gerinda dan las, jauh dari bahan mudah terbakar, dan sediakan APAR di dekatnya.",
+        "Rawat panel dan motor mesin berkala, serta kencangkan sambungan listrik yang kendur akibat getaran."
+      ]
+    },
+    "besi_peleburan": {
+      "hazardClass": "high",
+      "intro": "Peleburan logam bekerja dengan suhu ekstrem dan logam cair — ini butuh pemadam khusus dan prosedur kerja paling ketat.",
+      "hazards": [
+        {
+          "title": "Suhu Sangat Tinggi",
+          "desc": "Pemanasan ekstrem.",
+          "effect": "Tungku lebur beroperasi di suhu yang bisa menyulut hampir semua bahan di sekitarnya dari jarak jauh, hanya melalui pancaran panasnya saja.",
+          "icon": "thermometer"
+        },
+        {
+          "title": "Tungku Lebur",
+          "desc": "Tungku aktif terus-menerus.",
+          "effect": "Tungku yang menyala nonstop tidak boleh rusak. Gangguan pada lapisan tahan api atau sistem pendinginnya dapat memicu kebakaran atau bahkan ledakan besar.",
+          "icon": "flame"
+        },
+        {
+          "title": "Logam Cair",
+          "desc": "Cairan logam sangat panas.",
+          "effect": "Logam cair yang tumpah membakar apa pun yang disentuhnya. Bahaya terbesar: bila mengenai air atau permukaan lembap, ia bisa meledak menyemburkan cairan panas ke pekerja di sekitarnya.",
+          "icon": "droplet"
+        },
+        {
+          "title": "Radiasi Panas",
+          "desc": "Percikan & panas menyebar.",
+          "effect": "Percikan logam pijar terlempar jauh dari tungku dan bisa menyulut bahan mudah terbakar di sudut ruangan yang tampaknya aman.",
+          "icon": "sparkles"
+        }
+      ],
+      "apar": ["classd", "powder", "co2"],
+      "improvements": [
+        "Sediakan pemadam khusus logam (Kelas D) di area tungku, karena APAR biasa tidak berfungsi, dan air justru membuat keadaan jauh lebih berbahaya.",
+        "Jaga area kerja benar-benar kering, karena kontak antara logam cair dan air memicu ledakan uap yang sangat berbahaya.",
+        "Rawat lapisan tahan api dan sistem pendingin tungku secara berkala agar tidak jebol saat beroperasi.",
+        "Wajibkan APD tahan panas lengkap dan prosedur penuangan yang ketat, karena di sini keselamatan pekerja sama pentingnya dengan proteksi bangunan."
+      ]
+    },
+    "restoran": {
+      "hazardClass": "ordinary",
+      "intro": "Restoranmu paling rawan di area dapur — minyak panas dan gas jadi perhatian utama. Ini langkah menjaganya tetap aman.",
+      "hazards": [
+        {
+          "title": "Dapur & Penggorengan",
+          "desc": "Minyak panas & deep fryer.",
+          "effect": "Deep fryer yang terlalu panas bisa menyala sendiri, dan menyiram api minyak dengan air justru membuatnya meledak, ini penyebab luka bakar paling sering di dapur restoran.",
+          "icon": "cooking-pot"
+        },
+        {
+          "title": "Instalasi Gas",
+          "desc": "Jaringan LPG dapur.",
+          "effect": "Dapur restoran memakai banyak tabung gas sekaligus. Satu sambungan bocor bisa mengumpulkan gas dalam jumlah besar yang menyambar hebat saat kompor dinyalakan.",
+          "icon": "flame"
+        },
+        {
+          "title": "Saluran Asap",
+          "desc": "Minyak menumpuk di ducting.",
+          "effect": "Uap minyak dari wajan mengembun jadi kerak minyak di dalam cerobong. Kerak ini sangat mudah terbakar dan bisa menjalarkan api ke seluruh saluran hingga ke atap.",
+          "icon": "fan"
+        },
+        {
+          "title": "Listrik Dapur",
+          "desc": "Banyak alat masak listrik.",
+          "effect": "Banyak alat masak listrik menyala bersamaan di satu jalur bisa membuat instalasi kelebihan beban dan memicu korsleting saat jam sibuk.",
+          "icon": "zap"
+        }
+      ],
+      "apar": ["wet", "co2", "powder"],
+      "improvements": [
+        "Pasang sistem pemadam otomatis di atas kompor dan penggorengan, karena api minyak menyebar terlalu cepat untuk diandalkan pada APAR manual saja.",
+        "Bersihkan cerobong asap dapur secara rutin agar kerak lemak tidak menumpuk dan menjadi jalur rambatan api.",
+        "Pasang detektor gas dengan katup penutup otomatis supaya aliran LPG langsung berhenti saat terjadi kebocoran.",
+        "Sediakan APAR Wet Chemical (Kelas K) khusus minyak di dekat penggorengan, dan latih staf untuk tidak pernah menyiramnya dengan air."
+      ]
+    },
+    "restoran_mall": {
+      "hazardClass": "ordinary",
+      "intro": "Sebagai tenant kuliner di mall, keselamatanmu terhubung dengan sistem gedung dan tenant lain. Koordinasi jadi kuncinya.",
+      "hazards": [
+        {
+          "title": "Dapur Tertutup",
+          "desc": "Dapur di dalam gedung mall.",
+          "effect": "Dapur di dalam gedung tertutup membuat asap cepat memenuhi ruangan dan mengurangi jarak pandang, sehingga staf dan pengunjung kesulitan menemukan jalan keluar.",
+          "icon": "cooking-pot"
+        },
+        {
+          "title": "Gas di Area Ramai",
+          "desc": "LPG di dekat pengunjung.",
+          "effect": "Kebocoran gas di lokasi yang dikelilingi ratusan pengunjung berpotensi mencelakai banyak orang sekaligus jika sampai tersulut.",
+          "icon": "flame"
+        },
+        {
+          "title": "Saluran Asap Bersama",
+          "desc": "Ducting terhubung tenant lain.",
+          "effect": "Cerobong yang terhubung antar tenant bisa menjadi jalan tol bagi api, kebakaran di dapurmu bisa merambat ke tenant sebelah, dan sebaliknya.",
+          "icon": "fan"
+        },
+        {
+          "title": "Bergantung Sistem Mall",
+          "desc": "Proteksi ikut gedung.",
+          "effect": "Kamu bergantung pada sprinkler dan alarm gedung. Kalau sistem mall lambat merespons atau kurang terawat, penanganan kebakaran di tenant-mu ikut terlambat.",
+          "icon": "building"
+        },
+        {
+          "title": "Pengunjung Padat",
+          "desc": "Banyak orang di sekitar.",
+          "effect": "Kepadatan pengunjung di jam ramai membuat evakuasi jadi lambat dan berisiko, apalagi jika jalur keluar terhalang meja atau barang.",
+          "icon": "users"
+        }
+      ],
+      "apar": ["wet", "co2", "powder"],
+      "improvements": [
+        "Selaraskan proteksi tenant-mu dengan sistem kebakaran mall, dan pastikan kamu tahu di mana titik alarm dan APAR terdekat.",
+        "Pasang sistem pemadam otomatis di area masak agar api dapur tertangani sendiri sebelum menyebar ke ruang bersama.",
+        "Pastikan jalur evakuasi tenant selalu bebas hambatan dan petunjuk arahnya jelas terlihat oleh pengunjung.",
+        "Ikuti pelatihan dan simulasi kebakaran yang diadakan pengelola gedung, serta koordinasi rutin soal pembersihan cerobong bersama."
+      ]
+    }
+  },
+  "hierarchy": {
+    "main": {
+      "title": "Kenali Risiko Usahamu",
+      "desc": "Pilih jenis usahamu untuk melihat bahaya apa yang mengintai dan apa yang bisa kamu lakukan.",
+      "breadcrumb": "Cek Risiko",
+      "items": [
+        {
+          "id": "property",
+          "name": "Property",
+          "icon": "building-2",
+          "desc": "Hotel, Rumah, Kantor, Gudang",
+          "count": "4 jenis"
+        },
+        {
+          "id": "industri",
+          "name": "Industri",
+          "icon": "factory",
+          "desc": "Plastik, Kertas, Textile, Besi, Kimia",
+          "count": "5 jenis"
+        },
+        {
+          "id": "fnb",
+          "name": "Food & Beverage",
+          "icon": "utensils",
+          "desc": "Restoran & Restoran dalam Mall",
+          "count": "2 jenis"
+        }
+      ]
+    },
+    "sub": {
+      "property": {
+        "title": "Property",
+        "desc": "Pilih jenis propertimu.",
+        "breadcrumb": "Property",
+        "items": [
+          {
+            "id": "hotel",
+            "name": "Hotel / Penginapan",
+            "icon": "bed",
+            "desc": "Penginapan, hotel komersial"
+          },
+          {
+            "id": "rumah_tinggal",
+            "name": "Rumah Tinggal",
+            "icon": "home",
+            "desc": "Hunian atau tempat tinggal pribadi"
+          },
+          {
+            "id": "kantor",
+            "name": "Kantor",
+            "icon": "briefcase",
+            "desc": "Gedung perkantoran / ruko usaha"
+          },
+          {
+            "id": "gudang",
+            "name": "Gudang",
+            "icon": "warehouse",
+            "desc": "Area penyimpanan logistik"
+          }
+        ]
+      },
+      "industri": {
+        "title": "Industri",
+        "desc": "Pilih bidang usahamu.",
+        "breadcrumb": "Industri",
+        "items": [
+          {
+            "id": "plastik",
+            "name": "Plastik",
+            "icon": "box",
+            "desc": "Pengolahan produk plastik",
+            "hasChild": true
+          },
+          {
+            "id": "kertas",
+            "name": "Kertas",
+            "icon": "file-text",
+            "desc": "Pabrik bubur kertas & produk kertas"
+          },
+          {
+            "id": "textile",
+            "name": "Textile",
+            "icon": "scissors",
+            "desc": "Garmen, tekstil, dan tenun"
+          },
+          {
+            "id": "besi",
+            "name": "Besi & Logam",
+            "icon": "anvil",
+            "desc": "Pengolahan dan pabrikasi besi",
+            "hasChild": true
+          },
+          {
+            "id": "chemical",
+            "name": "Chemical Product",
+            "icon": "flask-conical",
+            "desc": "Manufaktur produk kimia"
+          }
+        ]
+      },
+      "fnb": {
+        "title": "Food & Beverage",
+        "desc": "Pilih tipe usaha kulinermu.",
+        "breadcrumb": "Food & Beverage",
+        "items": [
+          {
+            "id": "restoran",
+            "name": "Restoran",
+            "icon": "utensils",
+            "desc": "Rumah makan / restoran independen"
+          },
+          {
+            "id": "restoran_mall",
+            "name": "Restoran dalam Mall",
+            "icon": "shopping-bag",
+            "desc": "Tenant kuliner di pusat perbelanjaan"
+          }
+        ]
+      }
+    },
+    "subChild": {
+      "plastik": {
+        "title": "Pengolahan Plastik",
+        "desc": "Pilih jenis prosesnya.",
+        "breadcrumb": "Industri › Plastik",
+        "items": [
+          {
+            "id": "plastik_injeksi",
+            "name": "Injeksi / Molding",
+            "icon": "cpu",
+            "desc": "Pencetakan menggunakan mesin injeksi"
+          },
+          {
+            "id": "plastik_lembaran",
+            "name": "Lembaran (Sheet / Film)",
+            "icon": "layers",
+            "desc": "Produksi film atau lembaran plastik"
+          }
+        ]
+      },
+      "besi": {
+        "title": "Pengolahan Besi & Logam",
+        "desc": "Pilih metode kerjanya.",
+        "breadcrumb": "Industri › Besi",
+        "items": [
+          {
+            "id": "besi_hotpress",
+            "name": "Hotpress",
+            "icon": "flame",
+            "desc": "Pengepresan dengan suhu panas"
+          },
+          {
+            "id": "besi_peleburan",
+            "name": "Peleburan (Smelting)",
+            "icon": "zap",
+            "desc": "Proses peleburan bijih atau besi"
+          }
+        ]
+      }
+    }
+  }
+};

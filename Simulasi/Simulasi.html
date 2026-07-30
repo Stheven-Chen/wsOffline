@@ -534,7 +534,7 @@
               <input
                 id="nama-tertanggung"
                 type="text"
-                value="Ibu Wiwin"
+                value=""
                 class="w-full field rounded-xl px-4 py-2.5 text-sm"
                 placeholder="Nama lengkap"
                 aria-describedby="err-nama"
@@ -559,7 +559,7 @@
                   step="0.1"
                   min="0"
                   max="15"
-                  value="15.0"
+                  value=""
                   class="w-full field rounded-xl px-4 py-2.5 text-sm pr-9"
                   placeholder="0.0"
                 />
@@ -582,9 +582,7 @@
                 rows="2"
                 class="w-full field rounded-xl px-4 py-2.5 text-sm resize-none"
                 placeholder="Alamat lengkap lokasi objek"
-              >
-Jln. Kelapa Sawit IX Blok BF 3/3 Sektor 1B Gading Serpong</textarea
-              >
+              ></textarea>
             </div>
 
             <div>
@@ -735,7 +733,7 @@ Jln. Kelapa Sawit IX Blok BF 3/3 Sektor 1B Gading Serpong</textarea
                   inputmode="numeric"
                   id="bangunan"
                   class="tsi-input w-full field rounded-xl pl-10 pr-4 py-2.5 text-sm font-mono"
-                  value="0"
+                  value=""
                   placeholder="0"
                 />
               </div>
@@ -762,7 +760,7 @@ Jln. Kelapa Sawit IX Blok BF 3/3 Sektor 1B Gading Serpong</textarea
                   inputmode="numeric"
                   id="content"
                   class="tsi-input w-full field rounded-xl pl-10 pr-4 py-2.5 text-sm font-mono"
-                  value="0"
+                  value=""
                   placeholder="0"
                 />
               </div>
@@ -789,7 +787,7 @@ Jln. Kelapa Sawit IX Blok BF 3/3 Sektor 1B Gading Serpong</textarea
                   inputmode="numeric"
                   id="stok"
                   class="tsi-input w-full field rounded-xl pl-10 pr-4 py-2.5 text-sm font-mono"
-                  value="0"
+                  value=""
                   placeholder="0"
                 />
               </div>
@@ -816,7 +814,7 @@ Jln. Kelapa Sawit IX Blok BF 3/3 Sektor 1B Gading Serpong</textarea
                   inputmode="numeric"
                   id="mesin"
                   class="tsi-input w-full field rounded-xl pl-10 pr-4 py-2.5 text-sm font-mono"
-                  value="0"
+                  value=""
                   placeholder="0"
                 />
               </div>
@@ -1665,10 +1663,12 @@ Jln. Kelapa Sawit IX Blok BF 3/3 Sektor 1B Gading Serpong</textarea
       </form>
 
       <p class="text-center text-xs text-ink-400 mt-8">© 2026 Stheven</p>
-    </main>
+</main>
 
     <div id="toast-wrap" aria-live="assertive"></div>
 
+    <script src="GempaMap.js"></script>
+    <script src="rate.js"></script>
     <script>
       "use strict";
       document.addEventListener("DOMContentLoaded", () => {
@@ -2750,22 +2750,9 @@ Jln. Kelapa Sawit IX Blok BF 3/3 Sektor 1B Gading Serpong</textarea
           return data;
         }
 
-        async function loadJSON(url) {
-          try {
-            const res = await fetch(url);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            return await res.json();
-          } catch (err) {
-            console.error(`Gagal memuat ${url}:`, err);
-            return null;
-          }
-        }
-
-        async function initData() {
-          const [gempa, rate] = await Promise.all([
-            loadJSON("./GempaMap.json"),
-            loadJSON("./rate.json"),
-          ]);
+        function initData() {
+          const gempa = window.GEMPA_MAP_DATA;
+          const rate = window.RATE_DATA;
 
           if (Array.isArray(gempa)) {
             state.gempaMapData = gempa;
@@ -2773,8 +2760,8 @@ Jln. Kelapa Sawit IX Blok BF 3/3 Sektor 1B Gading Serpong</textarea
               "Klik untuk pilih atau ketik daerah...";
             el.daerahSearch.disabled = false;
           } else {
-            el.daerahSearch.placeholder = "Gagal memuat GempaMap.json";
-            toast("Gagal memuat data daerah (GempaMap.json).", "err");
+            el.daerahSearch.placeholder = "Gagal memuat GempaMap.js";
+            toast("Gagal memuat data daerah (GempaMap.js).", "err");
           }
 
           if (rate && rate.rateProperty) {
@@ -2782,39 +2769,9 @@ Jln. Kelapa Sawit IX Blok BF 3/3 Sektor 1B Gading Serpong</textarea
             el.okupasiSearch.placeholder =
               "Klik untuk pilih atau ketik okupasi...";
             el.okupasiSearch.disabled = false;
-
-            // default pilihan awal
-            const ruko = state.rateData.rateProperty.find(
-              (i) => i.Okupasi === "Ruko",
-            );
-            if (ruko) {
-              state.selectedOkupasiUtama = ruko;
-              el.okupasiSearch.value = ruko.Okupasi;
-              el.kodeOkupasi.value = ruko["Kode Okupasi"] || "-";
-            }
-            const rumah = state.rateData.rateProperty.find(
-              (i) => i.Okupasi === "Rumah Tinggal",
-            );
-            if (rumah) {
-              state.selectedSampatan.Kiri = rumah;
-              state.selectedSampatan.Kanan = rumah;
-              $("sampatan-kiri").value =
-                `${rumah.Okupasi}${rumah["Kode Okupasi"] ? " / " + rumah["Kode Okupasi"] : ""}`;
-              $("sampatan-kanan").value = $("sampatan-kiri").value;
-            }
-            const jalan = state.rateData.rateProperty.find(
-              (i) => i.Okupasi === "Jalan",
-            );
-            if (jalan) {
-              state.selectedSampatan.Depan = jalan;
-              state.selectedSampatan.Belakang = jalan;
-              $("sampatan-depan").value =
-                `${jalan.Okupasi}${jalan["Kode Okupasi"] ? " / " + jalan["Kode Okupasi"] : ""}`;
-              $("sampatan-belakang").value = $("sampatan-depan").value;
-            }
           } else {
-            el.okupasiSearch.placeholder = "Gagal memuat rate.json";
-            toast("Gagal memuat data rate (rate.json).", "err");
+            el.okupasiSearch.placeholder = "Gagal memuat rate.js";
+            toast("Gagal memuat data rate (rate.js).", "err");
           }
 
           // restore draft menimpa default (bila ada)
