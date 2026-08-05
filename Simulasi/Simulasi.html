@@ -14,6 +14,8 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
     <script>
       tailwind.config = {
@@ -1631,7 +1633,7 @@
           </div>
         </section>
 
-        <!-- ACTIONS -->
+                <!-- ACTIONS -->
         <div
           class="reveal flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-2 relative z-10"
         >
@@ -1643,32 +1645,24 @@
             Batal
           </button>
           <button
-            type="button"
-            id="btn-print"
-            disabled
-            class="w-full sm:w-auto px-6 py-3 rounded-xl border-2 border-ink-200 bg-white text-ink-400 opacity-50 cursor-not-allowed text-sm font-semibold transition-all flex items-center justify-center gap-2"
-          >
-            <i data-lucide="printer" class="w-4 h-4" aria-hidden="true"></i>
-            Cetak
-          </button>
-          <button
             type="submit"
-            disabled
-            class="btn-ripple w-full sm:w-auto btn-primary px-7 py-3 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 opacity-50 cursor-not-allowed"
+            class="btn-ripple w-full sm:w-auto btn-primary px-7 py-3 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2"
           >
             <i data-lucide="save" class="w-4 h-4" aria-hidden="true"></i> Simpan
             Data Proposal
           </button>
         </div>
+
       </form>
 
       <p class="text-center text-xs text-ink-400 mt-8">© Wealth Summit 2026</p>
-</main>
+    </main>
 
     <div id="toast-wrap" aria-live="assertive"></div>
 
     <script src="GempaMap.js"></script>
     <script src="rate.js"></script>
+    <script src="exportPDF.js"></script>
     <script>
       "use strict";
       document.addEventListener("DOMContentLoaded", () => {
@@ -1728,7 +1722,6 @@
           totalTsi: $("total-tsi"),
           form: $("main-form"),
           btnReset: $("btn-reset"),
-          btnPrint: $("btn-print"),
           // ringkasan
           premiFlexasVal: $("premi-flexas-val"),
           detailRateFlexas: $("detail-rate-flexas"),
@@ -2574,8 +2567,15 @@
           }
           const data = collectData();
           console.log("Data proposal siap disimpan:", data);
-          toast("Data proposal berhasil disimpan.", "ok");
           saveDraft();
+
+          // >>> generate PDF <<<
+          if (typeof window.exportProposalPDF === "function") {
+            window.exportProposalPDF(data);
+            toast("PDF proposal berhasil dibuat & diunduh.", "ok");
+          } else {
+            toast("exportPDF.js belum termuat.", "err");
+          }
         });
 
         /* =========================================================
@@ -2594,7 +2594,6 @@
           location.reload();
         });
 
-        el.btnPrint.addEventListener("click", () => window.print());
 
         /* =========================================================
        DRAFT (localStorage)
