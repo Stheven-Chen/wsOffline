@@ -297,10 +297,14 @@
 
     const ringkas = [
       ["GROSS PREMIUM", "", "", "Rp. " + num2(gross)],
-      ["DISCOUNT", "", `${akuisisi.toFixed(1)} %`, "- Rp. " + num2(diskon)],
-      ["ADMIN FEE", "", "", "Rp. " + num2(admin)],
-      ["NETT PREMIUM", "", "", "Rp. " + num2(nett)],
     ];
+    if (akuisisi > 0 && diskon > 0) {
+      ringkas.push(["DISCOUNT", "", `${akuisisi.toFixed(1)} %`, "- Rp. " + num2(diskon)]);
+    }
+    ringkas.push(
+      ["ADMIN FEE", "", "", "Rp. " + num2(admin)],
+      ["NETT PREMIUM", "", "", "Rp. " + num2(nett)]
+    );
 
     doc.autoTable({
       startY: y,
